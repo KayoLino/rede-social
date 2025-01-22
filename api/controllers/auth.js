@@ -13,7 +13,7 @@ export const register = (req, res) => {
     return res.status(422).json({ msg: "O email é obrigatório!" })
   }
   if (!password) {
-    return res.status(422).json({ msg: "A senha é obrigatório!" })
+    return res.status(422).json({ msg: "A senha é obrigatória!" })
   }
   if (password !== confirmPassword) {
     return res.status(422).json({ msg: "As senhas não são iguais." })
@@ -46,8 +46,12 @@ export const register = (req, res) => {
 export const login = (req, res) => {
   const { email, password } = req.body;
 
-  if (!email || !password) {
-    return res.status(422).json({ msg: "Nenhum campo pode estar vazio!" })
+  if (!email) {
+    return res.status(422).json({ msg: "O email é obrigatório!" })
+  }
+
+  if (!password) {
+    return res.status(422).json({ msg: "A senha é obrigatória!" })
   }
 
   db.query("SELECT * FROM user WHERE email= ?", [email], async (error, data) => {
@@ -63,7 +67,7 @@ export const login = (req, res) => {
       const checkPassword = await bcrypt.compare(password, user.password);
 
       if (!checkPassword) {
-        return res.status(422).json({ mgs: "Senha incorreta!" });
+        return res.status(422).json({ msg: "Senha incorreta!" });
       }
 
       try {
@@ -81,7 +85,11 @@ export const login = (req, res) => {
           process.env.TOKEN,
           { algorithm: "HS256" }
         )
-        res.status(200).json({ msg: "Usuário logado com sucesso!", token, refreshToken })
+
+        res.status(200).json({
+          msg: "Usuário logado com sucesso!",
+          data: { user, token: { token, refreshToken } }
+        })
 
       } catch (error) {
         console.log(error)
